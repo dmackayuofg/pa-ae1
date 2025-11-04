@@ -94,8 +94,13 @@ def parse_line(line):
     HINT: Consider using the "strip()" and "split()" function here
     
     """    
-    
-    <YOUR-CODE-HERE>
+
+    line = line.split() # .split() performs the job of .strip() aswell, so i dont think its needed
+
+    list_of_words = []
+    for word in line:
+        list_of_words.append(sanitize_word(word))
+
     return(list_of_words)
 
 #%%----------------------------------------------------------------------------
