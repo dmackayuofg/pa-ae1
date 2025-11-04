@@ -79,7 +79,7 @@ def sanitize_word(word):
         printable_ascii_chars.append(chr(i)) 
 
     for char in word:
-        if char in allowed:
+        if char in printable_ascii_chars:
             newword += char
 
     return(newword)
