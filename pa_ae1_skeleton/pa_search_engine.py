@@ -67,14 +67,21 @@ def sanitize_word(word):
     Removes all non ascii characters from a given word
     """    
     newword = ""
-    allowed = ["a","b","c","d","e","f","g","h","i","j","k","l","m",
+
+    alphanumeric_chars = ["a","b","c","d","e","f","g","h","i","j","k","l","m", # list of the alphanumerics
                "n","o","p","q","r","s","t","u","v","w","x","y","z",
                "A","B","C","D","E","F","G","H","I","J","K","L","M",
                "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
                "0","1","2","3","4","5","6","7","8","9"]
+    
+    printable_ascii_chars = [] # list of all ascii from 32-127. unsure which is the better to use
+    for i in range(32,127):
+        printable_ascii_chars.append(chr(i)) 
+
     for char in word:
         if char in allowed:
             newword += char
+
     return(newword)
 
 #%%----------------------------------------------------------------------------
