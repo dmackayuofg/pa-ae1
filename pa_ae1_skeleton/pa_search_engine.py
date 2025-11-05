@@ -149,13 +149,15 @@ def index_file  (filename
 
         contents = f.read() # this includes the header, could start at body? examples say its fine
         contents_clean = parse_line(contents)
+        forward_index_calc(forward_index, contents_clean, filename)
+        inverted_index_calc(forward_index, contents_clean, filename)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
 
 #%%----------------------------------------------------------------------------
 def forward_index_calc(forward_index, contents, filename):
-    # so this is just getting all unique words in the text
+    # this is just getting all unique words in the text
     # need to create list of all words with no dupes (use a set?)
     # then add a new dict entry to forward_index with key=filename, value=the set of words
     
@@ -167,7 +169,18 @@ def forward_index_calc(forward_index, contents, filename):
             seen_words.append(word)
 
     forward_index[filename] = seen_words
-    
+
+#%%----------------------------------------------------------------------------
+def inverted_index_calc(invert_index, contents, filename):
+    # need to go thru each word in contents. if the word is not yet a key, add it with value of a
+    # list with 1 entry of the current filename. if the word is a key, set the value to the existing list + the current filename.
+    for word in contents:
+        if word not in invert_index:
+            invert_index[word] = [filename]
+        else:
+            if filename not in invert_index[word]: # if the word has already come up in the file, we shouldnt add the filename to the list cuz its there already
+                invert_index[word].append(filename)
+
 #%%----------------------------------------------------------------------------
 def search  (search_phrase
              ,forward_index
