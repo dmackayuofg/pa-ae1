@@ -147,12 +147,27 @@ def index_file  (filename
         # i guess i can reuse parse_line, even though i wrote it with the intention of it being used
         # on the users CLI query.
 
-        contents = f.read() # this includes the book info header, could start at real body?
+        contents = f.read() # this includes the header, could start at body? examples say its fine
         contents_clean = parse_line(contents)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
 
+#%%----------------------------------------------------------------------------
+def forward_index_calc(forward_index, contents, filename):
+    # so this is just getting all unique words in the text
+    # need to create list of all words with no dupes (use a set?)
+    # then add a new dict entry to forward_index with key=filename, value=the set of words
+    
+    # i can cheat this by converting contents to a set
+    # but i dont think i can analyse the complexity so i will do it faithfully
+    seen_words = []
+    for word in contents:
+        if word not in seen_words:
+            seen_words.append(word)
+
+    forward_index[filename] = seen_words
+    
 #%%----------------------------------------------------------------------------
 def search  (search_phrase
              ,forward_index
