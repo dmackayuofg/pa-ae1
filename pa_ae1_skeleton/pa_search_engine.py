@@ -151,6 +151,7 @@ def index_file  (filename
         contents_clean = parse_line(contents)
         forward_index_calc(forward_index, contents_clean, filename)
         inverted_index_calc(invert_index, contents_clean, filename)
+        term_frequency_calc(term_freq, contents, filename)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
@@ -180,6 +181,30 @@ def inverted_index_calc(invert_index, contents, filename):
         else:
             if filename not in invert_index[word]: # if the word has already come up in the file, we shouldnt add the filename to the list cuz its there already
                 invert_index[word].append(filename)
+
+#%%----------------------------------------------------------------------------
+def term_frequency_calc(term_freq, contents, filename):
+    # the dict will have keys of the filename, and the value is another dict
+    # the dict has keys of each word in the dict, and a value of the tf value
+
+    total_words = len(contents)
+    occurences = {}
+
+    for word in contents:
+        if word not in occurences:
+            occurences[word] = 1
+        else:
+            occurences[word] += 1
+
+    # now need to build a new dict thats just the occurences dict but each value 
+    # is divided by total words, doing this inplace would have lower space complexity probably
+    # even though its more readable
+
+    for word in occurences:
+        occurences[word] = occurences[word] / total_words
+
+    term_freq[filename] = occurences
+
 
 #%%----------------------------------------------------------------------------
 def search  (search_phrase
