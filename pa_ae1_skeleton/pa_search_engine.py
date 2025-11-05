@@ -150,7 +150,7 @@ def index_file  (filename
         contents = f.read() # this includes the header, could start at body? examples say its fine
         contents_clean = parse_line(contents)
         forward_index_calc(forward_index, contents_clean, filename)
-        inverted_index_calc(forward_index, contents_clean, filename)
+        inverted_index_calc(invert_index, contents_clean, filename)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
