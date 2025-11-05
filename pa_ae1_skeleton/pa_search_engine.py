@@ -197,8 +197,8 @@ def term_frequency_calc(term_freq, contents, filename):
             occurences[word] += 1
 
     # now need to build a new dict thats just the occurences dict but each value 
-    # is divided by total words, doing this inplace would have lower space complexity probably
-    # even though its more readable
+    # is divided by total words, doing this inplace would have lower space complexity
+    # probably even though its less readable since the variable name is kinda wrong
 
     for word in occurences:
         occurences[word] = occurences[word] / total_words
