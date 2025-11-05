@@ -152,6 +152,7 @@ def index_file  (filename
         forward_index_calc(forward_index, contents_clean, filename)
         inverted_index_calc(invert_index, contents_clean, filename)
         term_frequency_calc(term_freq, contents, filename)
+        document_rank_calc(doc_rank, contents, filename)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
@@ -205,6 +206,9 @@ def term_frequency_calc(term_freq, contents, filename):
 
     term_freq[filename] = occurences
 
+#%%----------------------------------------------------------------------------
+def document_rank_calc(doc_rank, contents, filename):
+    doc_rank[filename] = 1/len(contents) # i think its just as simple as this
 
 #%%----------------------------------------------------------------------------
 def search  (search_phrase
