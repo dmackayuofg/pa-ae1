@@ -119,10 +119,36 @@ def index_file  (filename
         doc_rank
         and updates the invert_index (which is calculated across all files)
     """
+
+    # the dicts passed in are mutable ! so i dont need to return them. simply populating 
+    # them in here or wherever is good enough
+
+    # current filename and filepath is all we have, no actual data is in memory right now.
+    # the loop is in crawl_folder, so we dont need to loop and only deal with current filename
+
+    # steps:
+    # 1. read the file
+    # 2. do any data structure setup for the following functions if required
+    # 3. write functions and run on file for:
+    #       forward index
+    #       inverted index (update not overwrite)
+    #       term freq 
+    #       NOT inv_doc_freq, its done in crawl_folder
+    #       doc rank
+
     start = timer()
     with open(filepath, 'r', encoding="utf-8") as f:
-    
-    <YOUR-CODE-HERE>           
+        # assignment says:
+        """
+        While you are reading in the files to create the indices though, you will have to be
+        careful about cleaning up the text to remove special characters and white spaces, and also
+        deal with case sensitivity (recall, the search engine is meant to be case insensitive).
+        """
+        # i guess i can reuse parse_line, even though i wrote it with the intention of it being used
+        # on the users CLI query.
+
+        contents = f.read() # this includes the book info header, could start at real body?
+        contents_clean = parse_line(contents)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
