@@ -80,7 +80,8 @@ def sanitize_word(word):
 
     for char in word:
         if char in printable_ascii_chars:
-            newword += char
+            newword += char.lower() # i think this is an appropriate time to lowercase everything, 
+                                    # although it isnt implied in the given docstring
 
     return(newword)
 
