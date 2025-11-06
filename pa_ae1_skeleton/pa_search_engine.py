@@ -68,7 +68,7 @@ def sanitize_word(word):
     """
     newword = ""
     alphanumeric_chars = set(string.ascii_letters + string.digits)
-    # sets average O(1) (worst case O(n)) to check if element in the set. list is O(n).
+    # sets average O(1) (worst case O(n)) on membership check. list is O(n).
     # sets use hashing, lists iterate
 
     for char in word:
@@ -88,8 +88,8 @@ def parse_line(line):
     
     """
 
-    list_of_words_unsanitized = line.split() # .split() performs the job of .strip() aswell
-    list_of_words_clean = []                       # so i dont think its needed
+    list_of_words_unsanitized = line.split() # .split() performs the job of .strip() aswell so i dont think its needed
+    list_of_words_clean = []                 # i considered using an array here but they dont support strings
 
     for word in list_of_words_unsanitized:
         list_of_words_clean.append(sanitize_word(word))
@@ -132,17 +132,17 @@ def index_file  (filename
 #%%----------------------------------------------------------------------------
 def forward_index_calc(forward_index, contents, filename):
     # this is just getting all unique words in the text
-    # need to create list of all words with no dupes (use a set?)
+    # need to create list of all words with no dupes, so set is more appropriate.
     # then add a new dict entry to forward_index with key=filename, value=the set of words
-    
-    # i can cheat this by converting contents to a set
-    # but i dont think i can analyse the complexity so i will do it faithfully
-    seen_words = []
-    for word in contents:
-        if word not in seen_words:
-            seen_words.append(word)
 
-    forward_index[filename] = seen_words
+    seen = set()
+    for word in contents:
+        seen.add(word)
+
+    # when using lists, membership checking is O(n). set is O(1)
+    # (its in a loop so overall list is O(n^2) and set is O(n)
+
+    forward_index[filename] = seen
 
 #%%----------------------------------------------------------------------------
 def inverted_index_calc(invert_index, contents, filename):
