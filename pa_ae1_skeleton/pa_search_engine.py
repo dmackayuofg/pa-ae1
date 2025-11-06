@@ -153,8 +153,8 @@ def index_file  (filename
         contents_clean = parse_line(contents)
         forward_index_calc(forward_index, contents_clean, filename)
         inverted_index_calc(invert_index, contents_clean, filename)
-        term_frequency_calc(term_freq, contents, filename)
-        document_rank_calc(doc_rank, contents, filename)
+        term_frequency_calc(term_freq, contents_clean, filename)
+        document_rank_calc(doc_rank, contents_clean, filename)
     
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
