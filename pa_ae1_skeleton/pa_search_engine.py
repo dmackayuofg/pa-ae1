@@ -60,7 +60,7 @@ def crawl_folder(folder
     # where inv_doc_freq = number of documents with the word / total number of documents
     for word in invert_index.keys():
         inv_doc_freq[word] = len(invert_index[word])/total_docs
-        
+
 #%%----------------------------------------------------------------------------
 def sanitize_word(word):
     """
@@ -77,6 +77,8 @@ def sanitize_word(word):
     printable_ascii_chars = [] # list of all ascii from 32-127. unsure which is the better to use
     for i in range(32,127):
         printable_ascii_chars.append(chr(i)) 
+
+    # could do this using the string module, since its imported but not used
 
     for char in word:
         if char in printable_ascii_chars:
@@ -224,10 +226,32 @@ def search  (search_phrase
     Then you multiply this value with that documents document-rank 
     to arrive at a final weight for a given query, for every document. 
     """
-    
+    # i dont actually have file path or names in memory at the minute, and im not allowed to pass it in cuz
+    # i cant edit main.py so i guess i have to get it from forward_index
     words = parse_line(search_phrase)
     result = {}
 
-    <YOUR-CODE-HERE>           
+    for filename in forward_index:
+        weight = 1
+        for word in words:
+            weight *= (term_freq[filename].get(word, 0) * inv_doc_freq[word]) # using .get so i can default to 0 if not in dict
+        weight *= doc_rank[filename]
+        result[filename] = weight
+
+    # forward index and invert index not used ever? invert index is used to calc inv_doc so thats fine
+    # but forward index i only use for the filenames
+    # could be used for an optional feature
+
+    # i could do this in 1 line using sorted() and a lambda but i think thats probably not
+    # allowed and it makes it harder to analyse the complexity
+    items = []
+    for k, v in result.items():
+        items.append((v, k))
+    items = sorted(items, reverse=True)
+    sorted_result = []
+    for v, k in items:
+        sorted_result.append((k, v)) # i cant think of anything more elegant
 
     return(sorted_result)
+    # according to print_result, looks like sorted_result
+    # should be a list of tuples like [(filename, weight),...]
