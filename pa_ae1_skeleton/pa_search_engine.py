@@ -234,7 +234,7 @@ def search  (search_phrase
     for filename in forward_index:
         weight = 1
         for word in words:
-            weight *= (term_freq[filename].get(word, 0) * inv_doc_freq[word]) # using .get so i can default to 0 if not in dict
+            weight *= (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
         weight *= doc_rank[filename]
         result[filename] = weight
 
