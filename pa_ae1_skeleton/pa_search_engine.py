@@ -73,15 +73,11 @@ def sanitize_word(word):
                "A","B","C","D","E","F","G","H","I","J","K","L","M",
                "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
                "0","1","2","3","4","5","6","7","8","9"]
-    
-    printable_ascii_chars = [] # list of all ascii from 32-127. unsure which is the better to use
-    for i in range(32,127):
-        printable_ascii_chars.append(chr(i)) 
 
     # could do this using the string module, since its imported but not used
 
     for char in word:
-        if char in printable_ascii_chars:
+        if char in alphanumeric_chars:
             newword += char.lower() # i think this is an appropriate time to lowercase everything, 
                                     # although it isnt implied in the given docstring
 
