@@ -65,23 +65,17 @@ def crawl_folder(folder
 def sanitize_word(word):
     """
     Removes all non ascii characters from a given word
-    """    
+    """
     newword = ""
-
-    alphanumeric_chars = ["a","b","c","d","e","f","g","h","i","j","k","l","m", # list of the alphanumerics
-               "n","o","p","q","r","s","t","u","v","w","x","y","z",
-               "A","B","C","D","E","F","G","H","I","J","K","L","M",
-               "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
-               "0","1","2","3","4","5","6","7","8","9"]
-
-    # could do this using the string module, since its imported but not used
+    alphanumeric_chars = set(string.ascii_letters + string.digits)
+    # sets average O(1) (worst case O(n)) to check if element in the set. list is O(n).
+    # sets use hashing, lists iterate
 
     for char in word:
         if char in alphanumeric_chars:
-            newword += char.lower() # i think this is an appropriate time to lowercase everything, 
-                                    # although it isnt implied in the given docstring
-
-    return(newword)
+            newword += char.lower() # i think this is an appropriate time to lowercase everything,
+                                    # although it isnt implied in the docstring
+    return newword
 
 #%%----------------------------------------------------------------------------
 def parse_line(line):
@@ -92,15 +86,15 @@ def parse_line(line):
     
     HINT: Consider using the "strip()" and "split()" function here
     
-    """    
+    """
 
-    line = line.split() # .split() performs the job of .strip() aswell, so i dont think its needed
+    list_of_words_unsanitized = line.split() # .split() performs the job of .strip() aswell
+    list_of_words_clean = []                       # so i dont think its needed
 
-    list_of_words = []
-    for word in line:
-        list_of_words.append(sanitize_word(word))
+    for word in list_of_words_unsanitized:
+        list_of_words_clean.append(sanitize_word(word))
 
-    return(list_of_words)
+    return list_of_words_clean
 
 #%%----------------------------------------------------------------------------
 def index_file  (filename
@@ -118,40 +112,20 @@ def index_file  (filename
         and updates the invert_index (which is calculated across all files)
     """
 
-    # the dicts passed in are mutable ! so i dont need to return them. simply populating 
-    # them in here or wherever is good enough
+    # i dont need to return the dicts. simply populating them is good enough
 
     # current filename and filepath is all we have, no actual data is in memory right now.
     # the loop is in crawl_folder, so we dont need to loop and only deal with current filename
 
-    # steps:
-    # 1. read the file
-    # 2. do any data structure setup for the following functions if required
-    # 3. write functions and run on file for:
-    #       forward index
-    #       inverted index (update not overwrite)
-    #       term freq 
-    #       NOT inv_doc_freq, its done in crawl_folder
-    #       doc rank
-
     start = timer()
     with open(filepath, 'r', encoding="utf-8") as f:
-        # assignment says:
-        """
-        While you are reading in the files to create the indices though, you will have to be
-        careful about cleaning up the text to remove special characters and white spaces, and also
-        deal with case sensitivity (recall, the search engine is meant to be case insensitive).
-        """
-        # i guess i can reuse parse_line, even though i wrote it with the intention of it being used
-        # on the users CLI query.
-
-        contents = f.read() # this includes the header, could start at body? examples say its fine
+        contents = f.read()
         contents_clean = parse_line(contents)
         forward_index_calc(forward_index, contents_clean, filename)
         inverted_index_calc(invert_index, contents_clean, filename)
         term_frequency_calc(term_freq, contents_clean, filename)
         document_rank_calc(doc_rank, contents_clean, filename)
-    
+
     end = timer()
     print("Time taken to index file: ", filename, " = ", end-start)
 
