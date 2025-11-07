@@ -66,7 +66,7 @@ def sanitize_word(word):
     """
     Removes all non ascii characters from a given word
     """
-    chars = [] 
+    chars = []
     alphanumeric_chars = set(string.ascii_letters + string.digits)
     # sets average O(1) (worst case O(n)) on membership check. list is O(n).
     # sets use hashing, lists iterate
@@ -152,10 +152,8 @@ def inverted_index_calc(invert_index, contents, filename):
     # list with 1 entry of the current filename. if the word is a key, set the value to the existing list + the current filename.
     for word in contents:
         if word not in invert_index:
-            invert_index[word] = [filename]
-        else:
-            if filename not in invert_index[word]: # if the word has already come up in the file, we shouldnt add the filename to the list cuz its there already
-                invert_index[word].append(filename)
+            invert_index[word] = set()
+        invert_index[word].add(filename)
 
 #%%----------------------------------------------------------------------------
 def term_frequency_calc(term_freq, contents, filename):
