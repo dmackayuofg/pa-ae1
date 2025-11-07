@@ -66,15 +66,17 @@ def sanitize_word(word):
     """
     Removes all non ascii characters from a given word
     """
-    newword = ""
+    chars = [] 
     alphanumeric_chars = set(string.ascii_letters + string.digits)
     # sets average O(1) (worst case O(n)) on membership check. list is O(n).
     # sets use hashing, lists iterate
+    # (its in a loop so overall list is O(n^2) and set is O(n)
 
     for char in word:
         if char in alphanumeric_chars:
-            newword += char.lower() # i think this is an appropriate time to lowercase everything,
+            chars.append(char.lower()) # i think this is an appropriate time to lowercase everything,
                                     # although it isnt implied in the docstring
+    newword = "".join(chars)# i use a list instead of a string inside the loop since list append is o(1) and string append is o(n)
     return newword
 
 #%%----------------------------------------------------------------------------
@@ -138,11 +140,11 @@ def forward_index_calc(forward_index, contents, filename):
     seen = set()
     for word in contents:
         seen.add(word)
+    forward_index[filename] = seen
 
     # when using lists, membership checking is O(n). set is O(1)
     # (its in a loop so overall list is O(n^2) and set is O(n)
 
-    forward_index[filename] = seen
 
 #%%----------------------------------------------------------------------------
 def inverted_index_calc(invert_index, contents, filename):
@@ -180,7 +182,7 @@ def term_frequency_calc(term_freq, contents, filename):
 
 #%%----------------------------------------------------------------------------
 def document_rank_calc(doc_rank, contents, filename):
-    doc_rank[filename] = 1/len(contents) # i think its just as simple as this
+    doc_rank[filename] = 1/len(contents)
 
 #%%----------------------------------------------------------------------------
 def search  (search_phrase
@@ -197,7 +199,7 @@ def search  (search_phrase
     to arrive at a final weight for a given query, for every document. 
     """
     # i dont actually have file path or names in memory at the minute, and im not allowed to pass it in cuz
-    # i cant edit main.py so i guess i have to get it from forward_index
+    # i cant edit main.py so i guess i can get it from forward_index
     words = parse_line(search_phrase)
     result = {}
 
@@ -220,8 +222,6 @@ def search  (search_phrase
     items = sorted(items, reverse=True)
     sorted_result = []
     for v, k in items:
-        sorted_result.append((k, v)) # i cant think of anything more elegant
+        sorted_result.append((k, v))
 
-    return(sorted_result)
-    # according to print_result, looks like sorted_result
-    # should be a list of tuples like [(filename, weight),...]
+    return sorted_result
