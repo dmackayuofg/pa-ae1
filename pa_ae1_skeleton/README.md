@@ -73,7 +73,10 @@ The most significant operations are first three steps, as number of characters/w
 This is much larger than the searching for the precalculated index, which has O(nlog(n)) where n is the number of files.
 
 # B: Choice of Data Structures
+
 Explain and justify your choice of data structures.
+
+## Your Answer
 
 Going 1 by 1 of each function that I wrote, first there is `sanitize_word`. I choose to use a set to hold the correct characters, instead of a list. A set uses hashing to check membership, which has an average case of O(1), and a worst case of O(n). Lists must always loop through the entire list to check membership, so they always take O(n) time. I consulted [this page from the Python documentation](https://wiki.python.org/moin/TimeComplexity) to make my decision. 
 I then choose to create a characters list inside of the loop and then create the string after, instead of a string inside of the loop. This is because strings are immutable, so the string would be copied and new one would be created everytime, which is an O(n) operation. List append is O(1).
@@ -86,10 +89,7 @@ In `inverted_index_calc`, I again choose to use a set for the same reasons.
 
 In `term_frequency_calc`, I use a dictionary to hold the occurences. The only other data structure I could think of being usable would be a list of tuples holding the word and then the occurences, but membership checking is O(1) for dictionaries which is much better than O(n) for lists.
 
-In `search`, `result` was originally declared as a dictionary, however I think that using a list is more practical. I initially found when I implemented it using a dictionary that since `print_result` expects `search` to return a list of tuples, that it would make sense to implement it as that from the start, instead of converting the dictionary to a list of tuples after calculating the weights. They have identical time complexity, but having a list from the start means we don't need to create the extra dictionary, so we have slightly less memory usage.
-## Your Answer
-...
-
+In `search`, `result` was originally declared as a dictionary in the skeleton code, however I think that using a list is more practical. I initially found when I implemented it using a dictionary that since `print_result` expects `search` to return a list of tuples, that it would make sense to implement it as that from the start, instead of converting the dictionary to a list of tuples after calculating the weights. They have identical time complexity, but having a list from the start means we don't need to create the extra dictionary, so we have slightly less memory usage.
 
 # C: Discuss extra features, if any:
 If you implemented any extra feature on top of the requirements noted in this hanadout, briefly describe them here.
