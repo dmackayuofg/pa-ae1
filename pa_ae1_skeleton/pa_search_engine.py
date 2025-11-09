@@ -199,27 +199,24 @@ def search  (search_phrase
     # i dont actually have file path or names in memory at the minute, and im not allowed to pass it in cuz
     # i cant edit main.py so i guess i can get it from forward_index
     words = parse_line(search_phrase)
-    result = {}
+    result = []
 
     for filename in forward_index:
         weight = 1
         for word in words:
             weight *= (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
         weight *= doc_rank[filename]
-        result[filename] = weight
+        result.append((weight, filename))
 
-    # forward index and invert index not used ever? invert index is used to calc inv_doc so thats fine
-    # but forward index i only use for the filenames
+    # forward index not used ever?
+    # forward index i only use for the filenames
     # could be used for an optional feature
 
     # i could do this in 1 line using sorted() and a lambda but i think thats probably not
     # allowed and it makes it harder to analyse the complexity
-    items = []
-    for k, v in result.items():
-        items.append((v, k))
-    items = sorted(items, reverse=True)
+    result = sorted(result, reverse=True)
     sorted_result = []
-    for v, k in items:
+    for v, k in result:
         sorted_result.append((k, v))
 
     return sorted_result
