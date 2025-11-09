@@ -94,7 +94,24 @@ In `search`, `result` was originally declared as a dictionary in the skeleton co
 # C: Discuss extra features, if any:
 If you implemented any extra feature on top of the requirements noted in this hanadout, briefly describe them here.
 
-idea: extra cli flag that lets u enter search terms in relevance order
-
 ## Your Answer
-...
+
+I have added a new option for querying. Adding the `--ordered`, or `-o` flag when running `main.py` will 
+make it so that the order of the words in your search query implies the importance of each word, descending. 
+For example:
+```bash
+>>> python main.py -o
+Enter your search term: anna pierre
+# Search Results:
+anna_karenina.txt
+war_and_peace.txt
+Enter your search term: pierre anna
+# Search Results:
+war_and_peace.txt
+anna_karenina.txt
+```
+War and Peace, and Anna Karenina, both mention the words pierre and anna, but pierre occurs much more than anna  in War and Peace, and vice versa for Anna Karenina.
+
+I have had to minorly change `main.py` to allow for this, however it doesn't interfere with `tester.py`. Result should be identical if the `-o` flag is not included.
+
+Since the original algorithm is entirely multiplicative, simply adding a scalar to each word based on it's index wouldn't work since the order doesn't matter. Instead I had to somewhat intrusively change the algorithm to be summative instead.

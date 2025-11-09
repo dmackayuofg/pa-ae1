@@ -189,6 +189,7 @@ def search  (search_phrase
              ,term_freq
              ,inv_doc_freq
              ,doc_rank    
+             ,is_ordered=False
              ):
     """    
     For every document, you can take the product of TF and IDF 
@@ -201,12 +202,28 @@ def search  (search_phrase
     words = parse_line(search_phrase)
     result = []
 
+    
     for filename in forward_index:
-        weight = 1
-        for word in words:
-            weight *= (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
-        weight *= doc_rank[filename]
-        result.append((weight, filename))
+        if not is_ordered: # normal entry
+            weight = 1
+            for word in words:
+                word_weight = (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
+                weight *= word_weight
+            weight *= doc_rank[filename]
+            result.append((weight, filename))
+
+
+        else: # extra feature
+            if not all(word in term_freq[filename] for word in words):
+                result.append((0, filename))
+                continue
+            weight = 0
+            for i, word in enumerate(words):
+                word_weight = (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
+                weight += word_weight * (1 / (i+1))
+            weight *= doc_rank[filename]
+            result.append((weight, filename))
+            weight = 1
 
     # forward index not used ever?
     # forward index i only use for the filenames
