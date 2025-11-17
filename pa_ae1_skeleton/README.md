@@ -21,27 +21,30 @@ _Note_: You don’t have to do a line-by-line code-analysis like we do in certai
 
 ### Indexing Operation
 
+TODO: REWRITE WITH MULTIPLE VARIABLES INSTEAD OF JUST N AND REDEFINING. then make a legend at the top
+TODO: recheck highest level thing for search cuz im pretty sure its not o(number of files)
+
 The indexing operation is executed by calling the `index_file` method on each file, so we must discuss everything this method contains.
 
-`index_file` begins by opening and reading the file, which is an O(n) operation, where n is the length of the characters in the file.
+`index_file` begins by opening and reading the file, which is an O(c) operation, where c is the number of characters in the file.
 
-Then the `parse_line` method is called on the data, which first splits the contents into a list of words using the `.split()` method, which is an O(n) operation where n is the characters in the file.
+Then the `parse_line` method is called on the data, which first splits the contents into a list of words using the `.split()` method, which is an O(c).
 We then loop over each word and call the `sanitize_word` method.
 In `sanitize_word`, we loop over each character in the word, check if the char is in the set, and then append the char to the string. These are both O(1) operations so overall it is O(m) because of the loop, where m is the characters in the word.
-This makes the entire method of `parse_line` O(n) time, where n is the characters in the file.
+This makes the entire method of `parse_line` O(c) time.
 
 Now that we have our dataset ready, we move to building the individual indexing dictionaries.
-First, in `forward_index_calc`, we loop over every word in the file, and add them to a set (which checks duplicates in O(1) time). Due to the loop, this is O(n) time overall, where n is the words in the list.
+First, in `forward_index_calc`, we loop over every word in the file (after unsanitary words are removed), and add them to a set (which checks duplicates in O(1) time). Due to the loop, this is O(w) time overall, where w is the number of words in the file.
 
-Next, in `inverted_index_calc`, we loop over every word in the file, and check if the word is in the dictionary. If not we add it and make a new set for its key. If so, we add the current filename to the set for the current word if it's not already there (the membership check is done during the sets `.add()` method). All of these are O(1) operations, so due to the loop, this is O(n) time overall, where n is the words in the list.
+Next, in `inverted_index_calc`, we loop over every word in the file, and check if the word is in the dictionary. If not, we add it and make a new set for its key. If so, we add the current filename to the set for the current word if it's not already there (the membership check is done during the sets `.add()` method). All of these are O(1) operations, so due to the loop, this is O(w) time overall.
 
-Then, in `term_frequency_calc`, we loop over each word, check membership and append. Then we loop over the keys in the dictionary once do a calculation. The first loop is O(n) where n is the words in the list. The second loop is O(m) where m is unique words in the loop. Worst case this is also O(n). Overall this method is O(n).
+Then, in `term_frequency_calc`, we loop over each word, check membership and append. Then we loop over the keys in the dictionary once do a calculation. The first loop is O(w). The second loop is O(m) where m is unique words in the file. Worst case, m is equal to w. Overall, this method is O(w).
 
 Finally in `document_rank_calc`, we have a simple O(1) operation.
 
-The aforementioned `index_file` method is thus O(n), where n is the characters in the file.
+The aforementioned `index_file` method is thus O(c).
 
-`index_file` is called by `crawl_folder`, which involves looping over each file of interest and indexing it. If we consider this he highest level of the indexing operation, then the indexing operation takes O(n) time, where n is the total number of characters **in all the files** (could also be described as O(nk), where k is number of files and n is the characters per file, if that wasn't clear).
+`index_file` is called by `crawl_folder`, which involves looping over each file of interest and indexing it. If we consider this the highest level of the indexing operation, then the indexing operation takes O(n) time, where n is the total number of characters **in all the files**.
 
 ### Search Operation
 
@@ -52,7 +55,7 @@ We first call `parse_line` on the search phrase, which we have established is O(
 Then we loop over every file in the directory, and then loop over every word in the search phrase. For each word we perform some dictionary lookups and assignments, all O(1) operations. For each each file we then perform some more O(1) operations. This makes this whole loop take O(nk) time, where n is the number of words in the phrase and k is the number of files.
 
 Now that we have our weights, we need to sort the files by the weights.
-We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(nlog(n)) time.
+We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(nlog(n)) time, where n is the number of elements to be sorted, which is the number of files.
 Then we have to flip the order of the tuples. We loop over each file again, taking O(n) time.
 
 The overall time complexity of the searching operation is O(nlog(n)) time, where n is the number of files. The operation with the largest time complexity is the sorting of the results.
@@ -99,6 +102,7 @@ If you implemented any extra feature on top of the requirements noted in this ha
 I have added a new option for querying. Adding the `--ordered`, or `-o` flag when running `main.py` will 
 make it so that the order of the words in your search query implies the importance of each word, descending. 
 For example:
+
 ```bash
 >>> python main.py -o
 Enter your search term: anna pierre
@@ -110,8 +114,9 @@ Enter your search term: pierre anna
 war_and_peace.txt
 anna_karenina.txt
 ```
-War and Peace, and Anna Karenina, both mention the words pierre and anna, but pierre occurs much more than anna  in War and Peace, and vice versa for Anna Karenina.
+
+War and Peace, and Anna Karenina, both mention the words `pierre` and `anna`, but `pierre` occurs much more than `anna` in War and Peace, and vice versa for Anna Karenina.
 
 I have had to minorly change `main.py` to allow for this, however it doesn't interfere with `tester.py`. Result should be identical if the `-o` flag is not included.
 
-Since the original algorithm is entirely multiplicative, simply adding a scalar to each word based on it's index wouldn't work since the order doesn't matter. Instead I had to somewhat intrusively change the algorithm to be summative instead.
+Since the original algorithm is entirely multiplicative, simply adding a scalar to each word based on it's index wouldn't work since the order doesn't matter. Instead, I had to somewhat intrusively change the algorithm to be summative instead.

@@ -21,6 +21,7 @@ import os
 
 #%%----------------------------------------------------------------------------
 def dict_to_file(di, fi):
+    os.makedirs(os.path.dirname(fi), exist_ok=True)
     with open(fi, "w") as f:
         for key, value in di.items():
             f.write("%s:%s\n" % (key, value))
