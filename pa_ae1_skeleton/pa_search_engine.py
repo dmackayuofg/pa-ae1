@@ -215,7 +215,14 @@ def search  (search_phrase
 
 
         else: # extra feature
-            if not all(word in term_freq[filename] for word in words):
+            #if not all(word in term_freq[filename] for word in words):
+
+            missing = False
+            for word in words:
+                if word not in term_freq[filename]:
+                    missing = True
+                    break
+            if missing:
                 result.append((0, filename))
                 continue
             weight = 0
