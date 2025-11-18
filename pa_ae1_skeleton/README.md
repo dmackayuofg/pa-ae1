@@ -21,8 +21,15 @@ _Note_: You don’t have to do a line-by-line code-analysis like we do in certai
 
 ### Indexing Operation
 
-TODO: REWRITE WITH MULTIPLE VARIABLES INSTEAD OF JUST N AND REDEFINING. then make a legend at the top
-TODO: recheck highest level thing for search cuz im pretty sure its not o(number of files)
+I will first define every variable I use to describe the time complexity. I also redefine them the first time they are mentioned in the text.
+
++ c = the number of characters in the file
++ m = the characters in the word
++ w = the number of words in the file
++ m = unique words in the file
++ n = the total number of characters in all the files
++ p = the number of words in the search phrase
++ k = the number of files
 
 The indexing operation is executed by calling the `index_file` method on each file, so we must discuss everything this method contains.
 
@@ -50,30 +57,30 @@ The aforementioned `index_file` method is thus O(c).
 
 The search operation is executed by calling the `search` method on the user's search phrase.
 
-We first call `parse_line` on the search phrase, which we have established is O(n) where n is the characters in the phrase.
+We first call `parse_line` on the search phrase, which we have established is O(c).
 
-Then we loop over every file in the directory, and then loop over every word in the search phrase. For each word we perform some dictionary lookups and assignments, all O(1) operations. For each each file we then perform some more O(1) operations. This makes this whole loop take O(nk) time, where n is the number of words in the phrase and k is the number of files.
+Then we loop over every file in the directory, and then loop over every word in the search phrase. For each word we perform some dictionary lookups and assignments, all O(1) operations. For each each file we then perform some more O(1) operations. This makes this whole loop take O(pk) time, where p is the number of words in the phrase, and k is the number of files.
 
 Now that we have our weights, we need to sort the files by the weights.
-We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(nlog(n)) time, where n is the number of elements to be sorted, which is the number of files.
-Then we have to flip the order of the tuples. We loop over each file again, taking O(n) time.
+We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(klog(k)) time.
+Then we have to flip the order of the tuples. We loop over each file again, taking O(k) time.
 
-The overall time complexity of the searching operation is O(nlog(n)) time, where n is the number of files. The operation with the largest time complexity is the sorting of the results.
+The overall time complexity of the searching operation is O(klog(k)) time, as the operation with the most significant time complexity is the sorting of the results.
 
 ### Bruteforce Search Operation
 
 The steps involved in a bruteforce approach, where we haven't done the indexing beforehand, are:
 
-1. Read each file. This is an O(n) operation where n is the total characters across all files.
-2. Split and sanitize each word. This is an O(n) operation where n is the total characters across all files.
-3. Create the term frequency dictionary for each file. This is an O(w) operation where w is the number of words across all files.
-4. Calculate the inverse document frequency by going through every files term frequency dictionary. This is an O(pk) operation where p is the words in the search phrase, and k is the number of files.
+1. Read each file. This is an O(n) operation.
+2. Split and sanitize each word. This is an O(n) operation.
+3. Create the term frequency dictionary for each file. This is an O(wk) operation.
+4. Calculate the inverse document frequency by going through every files term frequency dictionary. This is an O(pk) operation.
 5. Calculate the weight for each document, using the term frequency and the inverse document frequency dictionaries, and document rank. This calculation is O(1) time, for each word in the search phrase, for each file. So it is a O(pk) operation.
 6. Then we sort by the weights. As established before, this is a O(klog(k)) operation when using Python's `.sorted()` method
 
-The most significant operations are first three steps, as number of characters/words will greatly exceed the number of words in a query or the number of files. With words being proportional to characters, we can say that overall this approach has O(n) time, where n is the number of characters across all files.
+The most significant operations are first three steps, as number of characters/words will greatly exceed the number of words in a query or the number of files. With words being proportional to characters, we can say that overall this approach has O(n) time.
 
-This is much larger than the searching for the precalculated index, which has O(nlog(n)) where n is the number of files.
+This is much larger than the searching for the precalculated index, which has O(klog(k)).
 
 # B: Choice of Data Structures
 
