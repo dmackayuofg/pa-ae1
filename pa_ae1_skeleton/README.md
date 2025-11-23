@@ -88,7 +88,7 @@ Explain and justify your choice of data structures.
 
 ## Your Answer
 
-Going 1 by 1 of each function that I wrote, first there is `sanitize_word`. I choose to use a set to hold the correct characters, instead of a list. A set uses hashing to check membership, which has an average case of O(1), and a worst case of O(n). Lists must always loop through the entire list to check membership, so they always take O(n) time. I consulted [this page from the Python documentation](https://wiki.python.org/moin/TimeComplexity) to make my decision. 
+Going 1 by 1 of each function that I wrote, first there is `sanitize_word`. I choose to use a set to hold the correct characters, instead of a list. A set uses hashing to check membership, which has an average case of O(1), and a worst case of O(n). Lists must always loop through the entire list to check membership, so they always take O(n) time. I consulted [this page from the Python documentation](https://wiki.python.org/moin/TimeComplexity) to make my decision.
 I then choose to create a characters list inside of the loop and then create the string after, instead of a string inside of the loop. This is because strings are immutable, so the string would be copied and new one would be created everytime, which is an O(n) operation. List append is O(1).
 
 In `parse_line`, I choose to use a list to hold the words. I considered using a tuple, but tuples are immutable and I need to append to the collection. I also considered using an array as they have O(1) appending like lists and would have less space complexity as I am sure I only need strings, but arrays cannot hold strings.
@@ -106,8 +106,7 @@ If you implemented any extra feature on top of the requirements noted in this ha
 
 ## Your Answer
 
-I have added a new option for querying. Adding the `--ordered`, or `-o` flag when running `main.py` will 
-make it so that the order of the words in your search query implies the importance of each word, descending. 
+I have added a new option for querying. Adding the `--ordered`, or `-o` flag when running `main.py` will make it so that the order of the words in your search query implies the importance of each word, descending.
 For example:
 
 ```bash
@@ -116,6 +115,7 @@ Enter your search term: anna pierre
 # Search Results:
 anna_karenina.txt
 war_and_peace.txt
+
 Enter your search term: pierre anna
 # Search Results:
 war_and_peace.txt
