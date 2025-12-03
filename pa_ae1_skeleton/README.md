@@ -21,56 +21,66 @@ _Note_: You don’t have to do a line-by-line code-analysis like we do in certai
 
 ### Indexing Operation
 
+I will first define every variable I use to describe the time complexity. I also redefine them the first time they are mentioned in the text.
+
++ c = the number of characters in the file
++ m = the characters in the word
++ w = the number of words in the file
++ m = unique words in the file
++ n = the total number of characters in all the files
++ p = the number of words in the search phrase
++ k = the number of files
+
 The indexing operation is executed by calling the `index_file` method on each file, so we must discuss everything this method contains.
 
-`index_file` begins by opening and reading the file, which is an O(n) operation, where n is the length of the characters in the file.
+`index_file` begins by opening and reading the file, which is an O(c) operation, where c is the number of characters in the file.
 
-Then the `parse_line` method is called on the data, which first splits the contents into a list of words using the `.split()` method, which is an O(n) operation where n is the characters in the file.
+Then the `parse_line` method is called on the data, which first splits the contents into a list of words using the `.split()` method, which is an O(c).
 We then loop over each word and call the `sanitize_word` method.
 In `sanitize_word`, we loop over each character in the word, check if the char is in the set, and then append the char to the string. These are both O(1) operations so overall it is O(m) because of the loop, where m is the characters in the word.
-This makes the entire method of `parse_line` O(n) time, where n is the characters in the file.
+This makes the entire method of `parse_line` O(c) time.
 
 Now that we have our dataset ready, we move to building the individual indexing dictionaries.
-First, in `forward_index_calc`, we loop over every word in the file, and add them to a set (which checks duplicates in O(1) time). Due to the loop, this is O(n) time overall, where n is the words in the list.
+First, in `forward_index_calc`, we loop over every word in the file (after unsanitary words are removed), and add them to a set (which checks duplicates in O(1) time). Due to the loop, this is O(w) time overall, where w is the number of words in the file.
 
-Next, in `inverted_index_calc`, we loop over every word in the file, and check if the word is in the dictionary. If not we add it and make a new set for its key. If so, we add the current filename to the set for the current word if it's not already there (the membership check is done during the sets `.add()` method). All of these are O(1) operations, so due to the loop, this is O(n) time overall, where n is the words in the list.
+Next, in `inverted_index_calc`, we loop over every word in the file, and check if the word is in the dictionary. If not, we add it and make a new set for its key. If so, we add the current filename to the set for the current word if it's not already there (the membership check is done during the sets `.add()` method). All of these are O(1) operations, so due to the loop, this is O(w) time overall.
 
-Then, in `term_frequency_calc`, we loop over each word, check membership and append. Then we loop over the keys in the dictionary once do a calculation. The first loop is O(n) where n is the words in the list. The second loop is O(m) where m is unique words in the loop. Worst case this is also O(n). Overall this method is O(n).
+Then, in `term_frequency_calc`, we loop over each word, check membership and append. Then we loop over the keys in the dictionary once do a calculation. The first loop is O(w). The second loop is O(m) where m is unique words in the file. Worst case, m is equal to w. Overall, this method is O(w).
 
 Finally in `document_rank_calc`, we have a simple O(1) operation.
 
-The aforementioned `index_file` method is thus O(n), where n is the characters in the file.
+The aforementioned `index_file` method is thus O(c).
 
-`index_file` is called by `crawl_folder`, which involves looping over each file of interest and indexing it. If we consider this he highest level of the indexing operation, then the indexing operation takes O(n) time, where n is the total number of characters **in all the files** (could also be described as O(nk), where k is number of files and n is the characters per file, if that wasn't clear).
+`index_file` is called by `crawl_folder`, which involves looping over each file of interest and indexing it. If we consider this the highest level of the indexing operation, then the indexing operation takes O(n) time, where n is the total number of characters **in all the files**.
 
 ### Search Operation
 
 The search operation is executed by calling the `search` method on the user's search phrase.
 
-We first call `parse_line` on the search phrase, which we have established is O(n) where n is the characters in the phrase.
+We first call `parse_line` on the search phrase, which we have established is O(c).
 
-Then we loop over every file in the directory, and then loop over every word in the search phrase. For each word we perform some dictionary lookups and assignments, all O(1) operations. For each each file we then perform some more O(1) operations. This makes this whole loop take O(nk) time, where n is the number of words in the phrase and k is the number of files.
+Then we loop over every file in the directory, and then loop over every word in the search phrase. For each word we perform some dictionary lookups and assignments, all O(1) operations. For each each file we then perform some more O(1) operations. This makes this whole loop take O(pk) time, where p is the number of words in the phrase, and k is the number of files.
 
 Now that we have our weights, we need to sort the files by the weights.
-We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(nlog(n)) time.
-Then we have to flip the order of the tuples. We loop over each file again, taking O(n) time.
+We call Python's `sorted` method, which according to the [Python documentation](https://docs.python.org/3.10/howto/sorting.html) uses the [Timsort sorting algorithm](https://en.wikipedia.org/wiki/Timsort) which has O(klog(k)) time.
+Then we have to flip the order of the tuples. We loop over each file again, taking O(k) time.
 
-The overall time complexity of the searching operation is O(nlog(n)) time, where n is the number of files. The operation with the largest time complexity is the sorting of the results.
+The overall time complexity of the searching operation is O(klog(k)) time, as the operation with the most significant time complexity is the sorting of the results.
 
 ### Bruteforce Search Operation
 
 The steps involved in a bruteforce approach, where we haven't done the indexing beforehand, are:
 
-1. Read each file. This is an O(n) operation where n is the total characters across all files.
-2. Split and sanitize each word. This is an O(n) operation where n is the total characters across all files.
-3. Create the term frequency dictionary for each file. This is an O(w) operation where w is the number of words across all files.
-4. Calculate the inverse document frequency by going through every files term frequency dictionary. This is an O(pk) operation where p is the words in the search phrase, and k is the number of files.
+1. Read each file. This is an O(n) operation.
+2. Split and sanitize each word. This is an O(n) operation.
+3. Create the term frequency dictionary for each file. This is an O(wk) operation.
+4. Calculate the inverse document frequency by going through every files term frequency dictionary. This is an O(pk) operation.
 5. Calculate the weight for each document, using the term frequency and the inverse document frequency dictionaries, and document rank. This calculation is O(1) time, for each word in the search phrase, for each file. So it is a O(pk) operation.
 6. Then we sort by the weights. As established before, this is a O(klog(k)) operation when using Python's `.sorted()` method
 
-The most significant operations are first three steps, as number of characters/words will greatly exceed the number of words in a query or the number of files. With words being proportional to characters, we can say that overall this approach has O(n) time, where n is the number of characters across all files.
+The most significant operations are first three steps, as number of characters/words will greatly exceed the number of words in a query or the number of files. With words being proportional to characters, we can say that overall this approach has O(n) time.
 
-This is much larger than the searching for the precalculated index, which has O(nlog(n)) where n is the number of files.
+This is much larger than the searching for the precalculated index, which has O(klog(k)).
 
 # B: Choice of Data Structures
 
@@ -78,7 +88,7 @@ Explain and justify your choice of data structures.
 
 ## Your Answer
 
-Going 1 by 1 of each function that I wrote, first there is `sanitize_word`. I choose to use a set to hold the correct characters, instead of a list. A set uses hashing to check membership, which has an average case of O(1), and a worst case of O(n). Lists must always loop through the entire list to check membership, so they always take O(n) time. I consulted [this page from the Python documentation](https://wiki.python.org/moin/TimeComplexity) to make my decision. 
+Going 1 by 1 of each function that I wrote, first there is `sanitize_word`. I choose to use a set to hold the correct characters, instead of a list. A set uses hashing to check membership, which has an average case of O(1), and a worst case of O(n). Lists must always loop through the entire list to check membership, so they always take O(n) time. I consulted [this page from the Python documentation](https://wiki.python.org/moin/TimeComplexity) to make my decision.
 I then choose to create a characters list inside of the loop and then create the string after, instead of a string inside of the loop. This is because strings are immutable, so the string would be copied and new one would be created everytime, which is an O(n) operation. List append is O(1).
 
 In `parse_line`, I choose to use a list to hold the words. I considered using a tuple, but tuples are immutable and I need to append to the collection. I also considered using an array as they have O(1) appending like lists and would have less space complexity as I am sure I only need strings, but arrays cannot hold strings.
@@ -94,7 +104,26 @@ In `search`, `result` was originally declared as a dictionary in the skeleton co
 # C: Discuss extra features, if any:
 If you implemented any extra feature on top of the requirements noted in this hanadout, briefly describe them here.
 
-idea: extra cli flag that lets u enter search terms in relevance order
-
 ## Your Answer
-...
+
+I have added a new option for querying. Adding the `--ordered`, or `-o` flag when running `main.py` will make it so that the order of the words in your search query implies the importance of each word, descending.
+For example:
+
+```bash
+>>> python main.py -o
+Enter your search term: anna pierre
+# Search Results:
+anna_karenina.txt
+war_and_peace.txt
+
+Enter your search term: pierre anna
+# Search Results:
+war_and_peace.txt
+anna_karenina.txt
+```
+
+War and Peace, and Anna Karenina, both mention the words `pierre` and `anna`, but `pierre` occurs much more than `anna` in War and Peace, and vice versa for Anna Karenina.
+
+I have had to minorly change `main.py` to allow for this, however it doesn't interfere with `tester.py`. Result should be identical if the `-o` flag is not included.
+
+Since the original algorithm is entirely multiplicative, simply adding a scalar to each word based on it's index wouldn't work since the order doesn't matter. Instead, I had to somewhat intrusively change the algorithm to be summative instead.

@@ -14,6 +14,7 @@ This is main file that runs the search engine.
 
 import pa_search_engine as pa 
 from timeit import default_timer as timer
+import argparse
 
 #%%----------------------------------------------------------------------------
 # main
@@ -21,6 +22,10 @@ from timeit import default_timer as timer
 #------------------------------------------------------------------------------
             
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ordered", "-o", action="store_true")
+    args = parser.parse_args()
+
     forward_index = {}
     invert_index = {}
     term_freq = {}
@@ -49,7 +54,7 @@ if __name__ == "__main__":
         if(search_phrase == ""):
             break
         start = timer()
-        result = pa.search(search_phrase, forward_index, invert_index, term_freq, inv_doc_freq, doc_rank)
+        result = pa.search(search_phrase, forward_index, invert_index, term_freq, inv_doc_freq, doc_rank, is_ordered=args.ordered)
         end = timer()
 
         pa.print_result(result)

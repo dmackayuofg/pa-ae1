@@ -21,6 +21,7 @@ import os
 
 #%%----------------------------------------------------------------------------
 def dict_to_file(di, fi):
+    os.makedirs(os.path.dirname(fi), exist_ok=True)
     with open(fi, "w") as f:
         for key, value in di.items():
             f.write("%s:%s\n" % (key, value))
@@ -56,8 +57,6 @@ def crawl_folder(folder
             total_docs += 1
             index_file(file.name, file.path, forward_index, invert_index, term_freq, doc_rank)
 
-    # with invert_index calculated, we can calculate the inv_doc_freq of each unique word
-    # where inv_doc_freq = number of documents with the word / total number of documents
     for word in invert_index.keys():
         inv_doc_freq[word] = len(invert_index[word])/total_docs
 
@@ -66,17 +65,14 @@ def sanitize_word(word):
     """
     Removes all non ascii characters from a given word
     """
+    
     chars = []
     alphanumeric_chars = set(string.ascii_letters + string.digits)
-    # sets average O(1) (worst case O(n)) on membership check. list is O(n).
-    # sets use hashing, lists iterate
-    # (its in a loop so overall list is O(n^2) and set is O(n)
 
     for char in word:
         if char in alphanumeric_chars:
-            chars.append(char.lower()) # i think this is an appropriate time to lowercase everything,
-                                    # although it isnt implied in the docstring
-    newword = "".join(chars)# i use a list instead of a string inside the loop since list append is o(1) and string append is o(n)
+            chars.append(char.lower())
+    newword = "".join(chars)
     return newword
 
 #%%----------------------------------------------------------------------------
@@ -90,8 +86,8 @@ def parse_line(line):
     
     """
 
-    list_of_words_unsanitized = line.split() # .split() performs the job of .strip() aswell so i dont think its needed
-    list_of_words_clean = []                 # i considered using an array here but they dont support strings
+    list_of_words_unsanitized = line.split()
+    list_of_words_clean = []
 
     for word in list_of_words_unsanitized:
         list_of_words_clean.append(sanitize_word(word))
@@ -114,11 +110,6 @@ def index_file  (filename
         and updates the invert_index (which is calculated across all files)
     """
 
-    # i dont need to return the dicts. simply populating them is good enough
-
-    # current filename and filepath is all we have, no actual data is in memory right now.
-    # the loop is in crawl_folder, so we dont need to loop and only deal with current filename
-
     start = timer()
     with open(filepath, 'r', encoding="utf-8") as f:
         contents = f.read()
@@ -133,23 +124,13 @@ def index_file  (filename
 
 #%%----------------------------------------------------------------------------
 def forward_index_calc(forward_index, contents, filename):
-    # this is just getting all unique words in the text
-    # need to create list of all words with no dupes, so set is more appropriate.
-    # then add a new dict entry to forward_index with key=filename, value=the set of words
-
     seen = set()
     for word in contents:
         seen.add(word)
     forward_index[filename] = seen
 
-    # when using lists, membership checking is O(n). set is O(1)
-    # (its in a loop so overall list is O(n^2) and set is O(n)
-
-
 #%%----------------------------------------------------------------------------
 def inverted_index_calc(invert_index, contents, filename):
-    # need to go thru each word in contents. if the word is not yet a key, add it with value of a
-    # list with 1 entry of the current filename. if the word is a key, set the value to the existing list + the current filename.
     for word in contents:
         if word not in invert_index:
             invert_index[word] = set()
@@ -157,9 +138,6 @@ def inverted_index_calc(invert_index, contents, filename):
 
 #%%----------------------------------------------------------------------------
 def term_frequency_calc(term_freq, contents, filename):
-    # the dict will have keys of the filename, and the value is another dict
-    # the dict has keys of each word in the dict, and a value of the tf value
-
     total_words = len(contents)
     occurences = {}
 
@@ -168,10 +146,6 @@ def term_frequency_calc(term_freq, contents, filename):
             occurences[word] = 1
         else:
             occurences[word] += 1
-
-    # now need to build a new dict thats just the occurences dict but each value 
-    # is divided by total words, doing this inplace would have lower space complexity
-    # probably even though its less readable since the variable name is kinda wrong
 
     for word in occurences:
         occurences[word] = occurences[word] / total_words
@@ -189,6 +163,7 @@ def search  (search_phrase
              ,term_freq
              ,inv_doc_freq
              ,doc_rank    
+             ,is_ordered=False
              ):
     """    
     For every document, you can take the product of TF and IDF 
@@ -196,24 +171,35 @@ def search  (search_phrase
     Then you multiply this value with that documents document-rank 
     to arrive at a final weight for a given query, for every document. 
     """
-    # i dont actually have file path or names in memory at the minute, and im not allowed to pass it in cuz
-    # i cant edit main.py so i guess i can get it from forward_index
+
     words = parse_line(search_phrase)
     result = []
-
+    
     for filename in forward_index:
-        weight = 1
-        for word in words:
-            weight *= (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0)) # using .get so i can default to 0 if not in dict
-        weight *= doc_rank[filename]
-        result.append((weight, filename))
+        if not is_ordered: # normal entry
+            weight = 1
+            for word in words:
+                word_weight = (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0))
+                weight *= word_weight
+            weight *= doc_rank[filename]
+            result.append((weight, filename))
 
-    # forward index not used ever?
-    # forward index i only use for the filenames
-    # could be used for an optional feature
+        else: # extra feature
+            missing = False
+            weight = 0
+            for i, word in enumerate(words):
+                if word not in term_freq[filename]:
+                    missing = True
+                    break
+                word_weight = (term_freq[filename].get(word, 0) * inv_doc_freq.get(word, 0))
+                weight += word_weight * (1 / (i+1))
+            if missing:
+                result.append((0, filename))
+                continue
+            weight *= doc_rank[filename]
+            result.append((weight, filename))
+            weight = 1
 
-    # i could do this in 1 line using sorted() and a lambda but i think thats probably not
-    # allowed and it makes it harder to analyse the complexity
     result = sorted(result, reverse=True)
     sorted_result = []
     for v, k in result:
